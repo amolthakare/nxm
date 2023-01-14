@@ -19,6 +19,7 @@ const authenticate = (req,res,next)=>{
         res.send("Please login first");
     }
 }
+
 module.exports={
     authenticate
 }
