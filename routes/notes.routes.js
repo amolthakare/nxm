@@ -5,8 +5,9 @@ require('dotenv').config();
 const { Router } = require("express");
 const noteRouter = Router();
 
-noteRouter.get("/",(req,res)=>{
-    res.send("notes");
+noteRouter.get("/",async(req,res)=>{
+    const result = await NoteModel.find();
+    res.send(result);
 })
 
 noteRouter.post("/create",async(req,res)=>{
@@ -14,7 +15,7 @@ noteRouter.post("/create",async(req,res)=>{
     try{
         const new_note = new NoteModel(payload);
         await new_note.save();
-        res.send("note created");
+        res.send(new_note);
     }
     catch(err){
         console.log(err);
@@ -47,16 +48,25 @@ noteRouter.patch("/update/:id",async(req,res)=>{
 })
 
 noteRouter.delete("/delete/:id",async(req,res)=>{
+    const payload = req.body;
+    const id = req.params.id;
+    const note = await NoteModel.findOne({"_id":id});
+    const userID_in_note = note.userID;
+    const userID_making_req = req.body.userID;
     try{
-        await NoteModel.deleteOne({_id: req.params.id});
-        res.status(204).send();
+        if(userID_making_req!==userID_in_note){
+            res.send({"msg":"you are not authorized"});
+        }
+        else{
+            await NoteModel.findByIdAndDelete({"_id":id});
+            res.send("note deleted");
+        }
     }
     catch(err){
         console.log(err);
         res.status(404);
-        res.send({error:"Movie doesn't exsist"})
+        res.send({error:"note doesn't exsist"})
     }
-    res.send("note deleted");
 })
 
 module.exports={

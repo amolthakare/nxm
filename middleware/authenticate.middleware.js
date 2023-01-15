@@ -16,7 +16,7 @@ const authenticate = (req,res,next)=>{
         }
     }
     else{
-        res.send("Please login first");
+        res.send("not login")
     }
 }
 
